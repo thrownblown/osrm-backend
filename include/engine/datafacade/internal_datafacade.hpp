@@ -360,7 +360,7 @@ class InternalDataFacade final : public BaseDataFacade
             std::vector<util::guidance::BearingClass> bearing_classes;
             // and the actual bearing values
             std::uint64_t num_bearings;
-            intersection_stream.read(reinterpret_cast<char*>(&num_bearings),sizeof(num_bearings));
+            intersection_stream.read(reinterpret_cast<char *>(&num_bearings), sizeof(num_bearings));
             m_bearing_values_table.resize(num_bearings);
             intersection_stream.read(reinterpret_cast<char *>(&m_bearing_values_table[0]),
                                      sizeof(m_bearing_values_table[0]) * num_bearings);
@@ -673,10 +673,11 @@ class InternalDataFacade final : public BaseDataFacade
         }
     }
 
-    virtual void GetUncompressedGeometry(const EdgeID id,
-                                         std::vector<NodeID> &result_nodes) const override final
+    virtual void
+    GetUncompressedForwardGeometry(const EdgeID id,
+                                   std::vector<NodeID> &result_nodes) const override final
     {
-        const unsigned begin = m_geometry_indices.at(id);
+        const unsigned begin = m_geometry_indices.at(id) + 1;
         const unsigned end = m_geometry_indices.at(id + 1);
 
         result_nodes.clear();
@@ -689,10 +690,26 @@ class InternalDataFacade final : public BaseDataFacade
     }
 
     virtual void
-    GetUncompressedWeights(const EdgeID id,
-                           std::vector<EdgeWeight> &result_weights) const override final
+    GetUncompressedReverseGeometry(const EdgeID id,
+                                   std::vector<NodeID> &result_nodes) const override final
     {
         const unsigned begin = m_geometry_indices.at(id);
+        const unsigned end = m_geometry_indices.at(id + 1) - 1;
+
+        result_nodes.clear();
+        result_nodes.reserve(end - begin);
+        std::for_each(m_geometry_list.rbegin() + (m_geometry_list.size() - end),
+                      m_geometry_list.rbegin() + (m_geometry_list.size() - begin),
+                      [&](const osrm::extractor::CompressedEdgeContainer::CompressedEdge &edge) {
+                          result_nodes.emplace_back(edge.node_id);
+                      });
+    }
+
+    virtual void
+    GetUncompressedForwardWeights(const EdgeID id,
+                                  std::vector<EdgeWeight> &result_weights) const override final
+    {
+        const unsigned begin = m_geometry_indices.at(id) + 1;
         const unsigned end = m_geometry_indices.at(id + 1);
 
         result_weights.clear();
@@ -700,7 +717,25 @@ class InternalDataFacade final : public BaseDataFacade
         std::for_each(m_geometry_list.begin() + begin,
                       m_geometry_list.begin() + end,
                       [&](const osrm::extractor::CompressedEdgeContainer::CompressedEdge &edge) {
-                          result_weights.emplace_back(edge.weight);
+                          BOOST_ASSERT(edge.forward_weight != INVALID_EDGE_WEIGHT);
+                          result_weights.emplace_back(edge.forward_weight);
+                      });
+    }
+
+    virtual void
+    GetUncompressedReverseWeights(const EdgeID id,
+                                  std::vector<EdgeWeight> &result_weights) const override final
+    {
+        const unsigned begin = m_geometry_indices.at(id);
+        const unsigned end = m_geometry_indices.at(id + 1) - 1;
+
+        result_weights.clear();
+        result_weights.reserve(end - begin);
+        std::for_each(m_geometry_list.rbegin() + (m_geometry_list.size() - end),
+                      m_geometry_list.rbegin() + (m_geometry_list.size() - begin),
+                      [&](const osrm::extractor::CompressedEdgeContainer::CompressedEdge &edge) {
+                          BOOST_ASSERT(edge.reverse_weight != INVALID_EDGE_WEIGHT);
+                          result_weights.emplace_back(edge.reverse_weight);
                       });
     }
 

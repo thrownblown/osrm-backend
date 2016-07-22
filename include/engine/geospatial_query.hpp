@@ -345,23 +345,21 @@ template <typename RTreeT, typename DataFacadeT> class GeospatialQuery
         int forward_offset = 0, forward_weight = 0;
         int reverse_offset = 0, reverse_weight = 0;
 
-        if (data.forward_packed_geometry_id != SPECIAL_EDGEID)
+        if (data.packed_geometry_id != SPECIAL_EDGEID)
         {
             std::vector<EdgeWeight> forward_weight_vector;
-            datafacade.GetUncompressedWeights(data.forward_packed_geometry_id,
-                                              forward_weight_vector);
+            std::vector<EdgeWeight> reverse_weight_vector;
+
+            datafacade.GetUncompressedForwardWeights(data.packed_geometry_id,
+                                                     forward_weight_vector);
             for (std::size_t i = 0; i < data.fwd_segment_position; i++)
             {
                 forward_offset += forward_weight_vector[i];
             }
             forward_weight = forward_weight_vector[data.fwd_segment_position];
-        }
 
-        if (data.reverse_packed_geometry_id != SPECIAL_EDGEID)
-        {
-            std::vector<EdgeWeight> reverse_weight_vector;
-            datafacade.GetUncompressedWeights(data.reverse_packed_geometry_id,
-                                              reverse_weight_vector);
+            datafacade.GetUncompressedReverseWeights(data.packed_geometry_id,
+                                                     reverse_weight_vector);
 
             BOOST_ASSERT(data.fwd_segment_position < reverse_weight_vector.size());
 

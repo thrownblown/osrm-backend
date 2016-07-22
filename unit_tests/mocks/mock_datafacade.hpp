@@ -57,11 +57,19 @@ class MockDataFacade final : public engine::datafacade::BaseDataFacade
     {
         return SPECIAL_NODEID;
     }
-    void GetUncompressedGeometry(const EdgeID /* id */,
+    void GetUncompressedForwardGeometry(const EdgeID /* id */,
                                  std::vector<NodeID> & /* result_nodes */) const override
     {
     }
-    void GetUncompressedWeights(const EdgeID /* id */,
+    void GetUncompressedReverseGeometry(const EdgeID /* id */,
+                                 std::vector<NodeID> & /* result_nodes */) const override
+    {
+    }
+    void GetUncompressedForwardWeights(const EdgeID /* id */,
+                                std::vector<EdgeWeight> & /* result_weights */) const override
+    {
+    }
+    void GetUncompressedReverseWeights(const EdgeID /* id */,
                                 std::vector<EdgeWeight> & /* result_weights */) const override
     {
     }

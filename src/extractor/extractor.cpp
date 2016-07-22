@@ -501,8 +501,6 @@ Extractor::BuildEdgeExpandedGraph(lua_State *lua_state,
                               *node_based_graph,
                               compressed_edge_container);
 
-    compressed_edge_container.SerializeInternalVector(config.geometry_output_path);
-
     util::NameTable name_table(config.names_file_name);
 
     std::vector<std::uint32_t> turn_lane_offsets;
@@ -531,6 +529,8 @@ Extractor::BuildEdgeExpandedGraph(lua_State *lua_state,
                                  config.edge_segment_lookup_path,
                                  config.edge_penalty_path,
                                  config.generate_edge_lookup);
+
+    compressed_edge_container.SerializeInternalVector(config.geometry_output_path);
 
     edge_based_graph_factory.GetEdgeBasedEdges(edge_based_edge_list);
     edge_based_graph_factory.GetEdgeBasedNodes(node_based_edge_list);

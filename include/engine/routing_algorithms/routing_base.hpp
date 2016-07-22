@@ -295,13 +295,29 @@ template <class DataFacadeT, class Derived> class BasicRoutingInterface
                         : facade->GetTravelModeForEdgeID(ed.id);
 
                 std::vector<NodeID> id_vector;
-                facade->GetUncompressedGeometry(facade->GetGeometryIndexForEdgeID(ed.id),
-                                                id_vector);
+                if (start_traversed_in_reverse)
+                {
+                    facade->GetUncompressedReverseGeometry(facade->GetGeometryIndexForEdgeID(ed.id),
+                                                           id_vector);
+                }
+                else
+                {
+                    facade->GetUncompressedForwardGeometry(facade->GetGeometryIndexForEdgeID(ed.id),
+                                                           id_vector);
+                }
                 BOOST_ASSERT(id_vector.size() > 0);
 
                 std::vector<EdgeWeight> weight_vector;
-                facade->GetUncompressedWeights(facade->GetGeometryIndexForEdgeID(ed.id),
-                                               weight_vector);
+                if (start_traversed_in_reverse)
+                {
+                    facade->GetUncompressedReverseWeights(facade->GetGeometryIndexForEdgeID(ed.id),
+                                                          weight_vector);
+                }
+                else
+                {
+                    facade->GetUncompressedReverseWeights(facade->GetGeometryIndexForEdgeID(ed.id),
+                                                          weight_vector);
+                }
                 BOOST_ASSERT(weight_vector.size() > 0);
 
                 auto total_weight = std::accumulate(weight_vector.begin(), weight_vector.end(), 0);
@@ -343,18 +359,19 @@ template <class DataFacadeT, class Derived> class BasicRoutingInterface
         std::size_t start_index = 0, end_index = 0;
         std::vector<unsigned> id_vector;
         std::vector<EdgeWeight> weight_vector;
-        const bool is_local_path = (phantom_node_pair.source_phantom.forward_packed_geometry_id ==
-                                    phantom_node_pair.target_phantom.forward_packed_geometry_id) &&
+        const bool is_local_path = (phantom_node_pair.source_phantom.packed_geometry_id ==
+                                    phantom_node_pair.target_phantom.packed_geometry_id) &&
                                    unpacked_path.empty();
 
         if (target_traversed_in_reverse)
         {
-            facade->GetUncompressedGeometry(
-                phantom_node_pair.target_phantom.reverse_packed_geometry_id, id_vector);
+            facade->GetUncompressedReverseGeometry(
+                phantom_node_pair.target_phantom.packed_geometry_id, id_vector);
 
-            facade->GetUncompressedWeights(
-                phantom_node_pair.target_phantom.reverse_packed_geometry_id, weight_vector);
+            facade->GetUncompressedReverseWeights(
+                phantom_node_pair.target_phantom.packed_geometry_id, weight_vector);
 
+            // TODO is the below flipped?????
             if (is_local_path)
             {
                 start_index =
@@ -370,11 +387,11 @@ template <class DataFacadeT, class Derived> class BasicRoutingInterface
                 start_index = phantom_node_pair.source_phantom.fwd_segment_position;
             }
             end_index = phantom_node_pair.target_phantom.fwd_segment_position;
-            facade->GetUncompressedGeometry(
-                phantom_node_pair.target_phantom.forward_packed_geometry_id, id_vector);
+            facade->GetUncompressedForwardGeometry(
+                phantom_node_pair.target_phantom.packed_geometry_id, id_vector);
 
-            facade->GetUncompressedWeights(
-                phantom_node_pair.target_phantom.forward_packed_geometry_id, weight_vector);
+            facade->GetUncompressedForwardWeights(
+                phantom_node_pair.target_phantom.packed_geometry_id, weight_vector);
         }
 
         // Given the following compressed geometry:
