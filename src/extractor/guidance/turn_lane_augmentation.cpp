@@ -280,11 +280,7 @@ LaneDataVector handleNoneValueAtSimpleTurn(LaneDataVector lane_data,
     // we have to reduce it, assigning it to neighboring turns
     else if (connection_count < lane_data.size())
     {
-        // a pgerequisite is simple turns. Larger differences should not end up here
-        // an additional line at the side is only reasonable if it is targeting public
-        // service vehicles. Otherwise, we should not have it
-        BOOST_ASSERT(connection_count + 1 == lane_data.size());
-
+        // Lanes may be restricted (e.g. PSV lanes or via lane access tags)
         lane_data = mergeNoneTag(none_index, std::move(lane_data));
     }
     // we have to rename and possibly augment existing ones. The pure count remains the
