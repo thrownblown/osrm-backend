@@ -787,9 +787,14 @@ EdgeID Contractor::LoadEdgeExpandedGraph(
                     }
                     else
                     {
-                        // This edge is blocked, we don't need to continue updating
-                        new_weight = INVALID_EDGE_WEIGHT;
-                        break;
+                        // If we hit a 0-speed edge, then it's effectively not traversible.
+                        // We don't want to include it in the edge_based_edge_list, so
+                        // we jump to the end of the parent loop and skip the remaineder
+                        // of the logic.  This is effectively a `continue` for the outer loop.
+                        // This is one of the few good use-cases for `goto` (a break/continue
+                        // on a parent loop), consider carefully the extra complexity involved
+                        // if you decide to remove this.
+                        goto skip_this_edge;
                     }
                 }
                 else
@@ -828,6 +833,10 @@ EdgeID Contractor::LoadEdgeExpandedGraph(
         }
 
         edge_based_edge_list.emplace_back(std::move(inbuffer));
+
+        // This is the jump target of the `goto` a few lines back.  It's used when we find a
+        // speed=0 edge and we want to skip adding it to the edge_based_edge_list.
+        skip_this_edge: ;
     }
 
     util::SimpleLogger().Write() << "Done reading edges";
