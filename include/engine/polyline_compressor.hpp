@@ -12,7 +12,7 @@ namespace engine
 {
 namespace detail
 {
-constexpr double POLYLINE_PRECISION = 1e5;
+constexpr double POLYLINE_PRECISION = 1e6;
 constexpr double COORDINATE_TO_POLYLINE = POLYLINE_PRECISION / COORDINATE_PRECISION;
 constexpr double POLYLINE_TO_COORDINATE = COORDINATE_PRECISION / POLYLINE_PRECISION;
 }
